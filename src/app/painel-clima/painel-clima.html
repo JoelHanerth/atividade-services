@@ -1,0 +1,96 @@
+<main class="weather-page">
+  <section class="intro">
+    <p class="eyebrow">API gratuita integrada</p>
+    <h1>Previsão do tempo por cidade</h1>
+    <p>
+      Este sistema consulta a API Open-Meteo, que não exige chave de acesso, para localizar uma
+      cidade e mostrar o clima atual junto com a previsão dos próximos cinco dias.
+    </p>
+  </section>
+
+  <section class="search-area" aria-label="Busca de previsão">
+    <form class="search-form" (ngSubmit)="pesquisar()">
+      <label for="city">Cidade</label>
+      <div class="input-row">
+        <input
+          id="city"
+          name="city"
+          type="text"
+          [(ngModel)]="cidade"
+          placeholder="Ex.: Colatina"
+          autocomplete="address-level2"
+        />
+        <button type="submit" [disabled]="carregando()">
+          {{ carregando() ? 'Buscando...' : 'Consultar' }}
+        </button>
+      </div>
+    </form>
+
+    <div class="quick-list" aria-label="Cidades sugeridas">
+      @for (cidadePadrao of cidadesPadrao; track cidadePadrao) {
+        <button type="button" (click)="usarCidadePadrao(cidadePadrao)">
+          {{ cidadePadrao }}
+        </button>
+      }
+    </div>
+  </section>
+
+  @if (erro()) {
+    <p class="message" role="alert">{{ erro() }}</p>
+  }
+
+  @if (relatorio(); as clima) {
+    <section class="dashboard" aria-label="Resultado da previsão">
+      <article class="current-weather">
+        <div>
+          <p class="label">Agora em</p>
+          <h2>{{ nomeLocal(clima) }}</h2>
+          <p class="updated">Atualizado em {{ atualizacaoFormatada(clima) }}</p>
+        </div>
+
+        <div class="temperature-block">
+          <strong>{{ clima.current.temperature | number: '1.0-0' }}°C</strong>
+          <span>{{ clima.current.condition }}</span>
+        </div>
+
+        <dl class="metrics">
+          <div>
+            <dt>Sensação</dt>
+            <dd>{{ clima.current.apparentTemperature | number: '1.0-0' }}°C</dd>
+          </div>
+          <div>
+            <dt>Umidade</dt>
+            <dd>{{ clima.current.humidity }}%</dd>
+          </div>
+          <div>
+            <dt>Vento</dt>
+            <dd>{{ clima.current.windSpeed | number: '1.0-0' }} km/h</dd>
+          </div>
+          <div>
+            <dt>Chuva agora</dt>
+            <dd>{{ clima.current.precipitation | number: '1.0-1' }} mm</dd>
+          </div>
+        </dl>
+      </article>
+
+      <section class="forecast-list" aria-label="Previsão dos próximos dias">
+        @for (dia of clima.daily; track dia.date) {
+          <article class="forecast-card">
+            <div>
+              <p>{{ dia.label }}</p>
+              <strong>{{ dia.condition }}</strong>
+            </div>
+            <div class="range">
+              <span>{{ dia.max | number: '1.0-0' }}°</span>
+              <small>{{ dia.min | number: '1.0-0' }}°</small>
+            </div>
+            <div class="rain">
+              <span>{{ dia.precipitationProbability }}%</span>
+              <small>chance de chuva</small>
+            </div>
+          </article>
+        }
+      </section>
+    </section>
+  }
+</main>
